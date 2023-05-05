@@ -10,12 +10,20 @@ const Entry = ({ phoneNumber, remove }) => {
     </li>
   );
 };
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null;
+  }
+
+  return <div className="error">{message}</div>;
+};
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     phoneservice.getAll().then((d) => setPersons(d));
@@ -47,6 +55,11 @@ const App = () => {
     if (window.confirm("delete?")) {
       phoneservice.remove(phone.id);
       setPersons(persons.filter((p) => p.id !== phone.id));
+
+      setMessage(`removed ${phone.name}`);
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
     }
   };
 
@@ -54,7 +67,6 @@ const App = () => {
     event.preventDefault();
 
     const contained = persons.find((e) => e.name === newName);
-    console.log(contained);
     if (contained) {
       alert(`contained: ${newName}`);
       return;
@@ -69,12 +81,18 @@ const App = () => {
         setPersons([newPhoneNumber].concat(persons));
         setNewName("");
         setPhoneNumber("");
+
+        setMessage(`added ${newPhoneNumber.name}`);
+        setTimeout(() => {
+          setMessage(null);
+        }, 5000);
       });
   };
 
   return (
     <div>
       <div>debug: {newName}</div>
+      <Notification message={message} />
       <h2>Phonebook</h2>
       <div>
         filter: <input onChange={handleChangeFilter} value={filter} />
