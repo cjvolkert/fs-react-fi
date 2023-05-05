@@ -1,4 +1,3 @@
-import { Course } from "./components/Course";
 import { CourseList } from "./components/CourseList";
 
 const App = () => {
