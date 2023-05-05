@@ -1,13 +1,29 @@
 import { Note } from "./Note";
 import { useState, useEffect } from "react";
-
+import { Notification } from "./Notification";
 //import { getAll, create, update } from "./services/notes";
 import noteService from "./services/notes";
 
+const Footer = () => {
+  const footerStyle = {
+    color: "green",
+    fontStyle: "italic",
+    fontSize: 16,
+  };
+  return (
+    <div style={footerStyle}>
+      <br />
+      <em>
+        Note app, Department of Computer Science, University of Helsinki 2022
+      </em>
+    </div>
+  );
+};
 const App = () => {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState("...note");
   const [showAll, setShowAll] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("some error");
 
   const hook = () => {
     noteService.getAll().then((response) => {
@@ -50,13 +66,20 @@ const App = () => {
     console.log("importance of " + id + " needs to be toggled");
     noteService
       .update(changedNote.id, changedNote)
-      .then((r) => setNotes(notes.map((n) => (n.id !== id ? n : r))));
+      .then((r) => setNotes(notes.map((n) => (n.id !== id ? n : r))))
+      .catch((error) => {
+        setErrorMessage(`Note ${note.content} ....  ${error}`);
+        setTimeout(() => {
+          setErrorMessage(null);
+        }, 5000);
+      });
   };
 
   console.log(notes.length);
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message={errorMessage} />
       <button type="submit" onClick={() => setShowAll(!showAll)}>
         show {showAll ? "important" : "all"}
       </button>
@@ -77,6 +100,8 @@ const App = () => {
         <input value={newNote} onChange={handleNoteChange} />
         <button type="submit">save</button>
       </form>
+
+      <Footer />
     </div>
   );
 };
