@@ -1,12 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+import phoneservice from "./services/numbers";
+
+const Entry = ({ phoneNumber, remove }) => {
+  return (
+    <li>
+      {phoneNumber.name} {phoneNumber.phone}
+      <button onClick={() => remove(phoneNumber)}>delete</button>
+    </li>
+  );
+};
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", phone: "1423" },
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    phoneservice.getAll().then((d) => setPersons(d));
+  }, []);
 
   const handleChange = (event) => {
     event.preventDefault();
@@ -30,17 +43,33 @@ const App = () => {
     );
   };
 
+  const remove = (phone) => {
+    if (window.confirm("delete?")) {
+      phoneservice.remove(phone.id);
+      setPersons(persons.filter((p) => p.id !== phone.id));
+    }
+  };
+
   const addName = (event) => {
     event.preventDefault();
+
     const contained = persons.find((e) => e.name === newName);
     console.log(contained);
     if (contained) {
       alert(`contained: ${newName}`);
       return;
     }
-    setPersons([{ name: newName, phone: phoneNumber }].concat(persons));
-    setNewName("");
-    setPhoneNumber("");
+
+    phoneservice
+      .add({
+        name: newName,
+        phone: phoneNumber,
+      })
+      .then((newPhoneNumber) => {
+        setPersons([newPhoneNumber].concat(persons));
+        setNewName("");
+        setPhoneNumber("");
+      });
   };
 
   return (
@@ -66,9 +95,11 @@ const App = () => {
       <h2>Numbers</h2>
       <ul>
         {filteredEntries().map((p) => (
-          <li key={p.name}>
-            {p.name} {p.phone}
-          </li>
+          <Entry key={p.id} phoneNumber={p} remove={remove} />
+          // <li key={p.name}>
+          //   {p.name} {p.phone}
+          //   <button onClick={() => remove(p)}>delete</button>
+          // </li>
         ))}
       </ul>
     </div>
