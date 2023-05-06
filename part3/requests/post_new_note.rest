@@ -1,0 +1,12 @@
+post http://localhost:3001/api/notes
+Content-Type: application/json
+
+{
+    "content" : "test vs code 2" ,
+    "important" : false
+}
+
+
+####
+
+get http://localhost:3001/api/notes
