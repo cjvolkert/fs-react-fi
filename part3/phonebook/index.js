@@ -45,6 +45,7 @@ app.use(
     }
   })
 );
+app.use(express.static("build"));
 
 app.get("/api/persons", (req, res) => {
   res.json(data);
@@ -108,7 +109,7 @@ app.post("/api/persons/", (req, res) => {
   res.json(entry);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
