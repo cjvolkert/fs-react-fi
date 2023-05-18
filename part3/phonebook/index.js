@@ -1,30 +1,12 @@
+require("dotenv").config();
+
 const express = require("express");
 const morgan = require("morgan");
 
-const app = express();
+const Phonebook = require("./models/phonebook");
+const mongoose = require("mongoose");
 
-let data = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
+const app = express();
 
 app.use(express.json());
 app.use(
@@ -48,23 +30,20 @@ app.use(
 app.use(express.static("build"));
 
 app.get("/api/persons", (req, res) => {
-  res.json(data);
+  Phonebook.find().then((data) => res.json(data));
 });
 
 app.get("/info", (req, res) => {
-  res.send(
-    `Phonebook has info for ${data.length} people  <br/>  ${new Date()}`
+  Phonebook.find().then((data) =>
+    res.send(
+      `Phonebook has info for ${data.length} people  <br/>  ${new Date()}`
+    )
   );
 });
-app.get("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
 
-  const entry = data.filter((d) => d.id === id);
-  if (entry) {
-    res.json(entry);
-  } else {
-    res.status(404).end();
-  }
+app.get("/api/persons/:id", (req, res) => {
+  const id2 = new mongoose.Types.ObjectId(req.params.id);
+  Phonebook.findById(id2).then((e) => res.json(e));
 });
 
 app.delete("/api/persons/:id", (req, res) => {
@@ -77,39 +56,34 @@ app.post("/api/persons/", (req, res) => {
   const body = req.body;
   console.log(body);
   if (!body) {
-    return res.status(400).json({
-      error: "no content",
-    });
+    return res.status(400).json({ error: "no content" });
   }
-
   if (!body.name) {
-    return res.status(400).json({
-      error: "name missing",
-    });
+    return res.status(400).json({ error: "name missing" });
   }
-  if (!body.number) {
-    return res.status(400).json({
-      error: "number missing",
-    });
+  if (!body.phone) {
+    return res.status(400).json({ error: "number missing" });
   }
-  console.log(data.filter((n) => n.name === body.name));
-  if (data.some((n) => n.name === body.name)) {
-    return res.status(400).json({
-      error: "duplicat name",
-    });
-  }
+  Phonebook.find().then((data) => {
+    if (data.some((n) => n.name === body.name)) {
+      return res.status(400).json({
+        error: "duplicat name",
+      });
+    }
 
-  const entry = {
-    id: Math.floor(Math.random() * 1000),
-    name: body.name,
-    number: body.number,
-  };
+    const entry = Phonebook({
+      name: body.name,
+      number: body.phone,
+    });
 
-  data = data.concat(entry);
-  res.json(entry);
+    entry.save().then((e) => {
+      console.log(`saved  ${e}!`);
+      res.json(e);
+    });
+  });
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
   console.log(`Server running on ${PORT}`);
