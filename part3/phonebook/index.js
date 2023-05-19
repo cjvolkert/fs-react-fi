@@ -42,46 +42,66 @@ app.get("/info", (req, res) => {
 });
 
 app.get("/api/persons/:id", (req, res) => {
-  const id2 = new mongoose.Types.ObjectId(req.params.id);
-  Phonebook.findById(id2).then((e) => res.json(e));
+  const id = new mongoose.Types.ObjectId(req.params.id);
+  Phonebook.findById(id).then((e) => res.json(e));
 });
 
 app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  data = data.filter((d) => d.id !== id);
-  res.status(202).end();
+  const id2 = new mongoose.Types.ObjectId(req.params.id);
+  Phonebook.findByIdAndDelete(id2)
+    .then((e) => res.status(204).end())
+    .catch((err) => next(err));
 });
 
 app.post("/api/persons/", (req, res) => {
   const body = req.body;
-  console.log(body);
   if (!body) {
     return res.status(400).json({ error: "no content" });
   }
   if (!body.name) {
     return res.status(400).json({ error: "name missing" });
   }
-  if (!body.phone) {
+  if (!body.number) {
     return res.status(400).json({ error: "number missing" });
   }
-  Phonebook.find().then((data) => {
-    if (data.some((n) => n.name === body.name)) {
-      return res.status(400).json({
-        error: "duplicat name",
+
+  const entry = {
+    name: body.name,
+    number: body.number,
+  };
+  Phonebook.findOne({ name: body.name }).then((n) => {
+    if (n) {
+      const existingId = n._id;
+      console.log(`updating ${existingId}`);
+      Phonebook.findByIdAndUpdate(existingId, entry, {}).then((savedNote) => {
+        res.json(savedNote);
       });
+    } else {
+      Phonebook(entry)
+        .save()
+        .then((e) => {
+          console.log(`saved  ${e}!`);
+          res.json(e);
+        });
     }
-
-    const entry = Phonebook({
-      name: body.name,
-      number: body.phone,
-    });
-
-    entry.save().then((e) => {
-      console.log(`saved  ${e}!`);
-      res.json(e);
-    });
   });
 });
+
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+// handler of requests with unknown endpoint
+app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+  console.error(error);
+  if (error.name === "CastError") {
+    return response.status(400).send({ error: "malformatted" });
+  }
+  next(error);
+};
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 
