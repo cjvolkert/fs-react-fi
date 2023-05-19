@@ -41,7 +41,7 @@ app.delete("/api/notes/:id", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-app.post("/api/notes/", (request, response) => {
+app.post("/api/notes/", (request, response, next) => {
   const body = request.body;
 
   if (!body.content) {
@@ -54,28 +54,31 @@ app.post("/api/notes/", (request, response) => {
     important: body.important || false,
   });
 
-  note.save().then((savedNote) => {
-    console.log("saved!");
-    response.json(savedNote);
-  });
+  note
+    .save()
+    .then((savedNote) => {
+      console.log("saved!");
+      response.json(savedNote);
+    })
+    .catch((err) => next(err));
 });
 
 app.put("/api/notes/:id", (request, response, next) => {
-  const body = request.body;
+  const { content, important } = request.body;
 
   let id = new mongoose.Types.ObjectId(request.params.id);
 
-  if (!body.content) {
+  if (!content) {
     return response.status(400).json({
       error: "no content for update",
     });
   }
-  const note = {
-    content: body.content,
-    important: body.important,
-  };
 
-  Note.findByIdAndUpdate(id, note, {}).then((savedNote) => {
+  Note.findByIdAndUpdate(
+    id,
+    { content, important },
+    { new: true, runValidators: true, context: "query" }
+  ).then((savedNote) => {
     console.log("saved!");
     response.json(savedNote);
   });
@@ -92,6 +95,8 @@ const errorHandler = (error, req, res, next) => {
   console.error(error);
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
   next(error);
 };
