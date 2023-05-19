@@ -2,11 +2,30 @@ post http://localhost:3001/api/notes
 Content-Type: application/json
 
 {
-    "content" : "test vs code 2" ,
+    "content" : "test vs code 4" ,
     "important" : false
 }
 
 
 ####
 
+put  http://localhost:3001/api/notes/6466948a6b4c082a789a3277
+Content-Type: application/json
+
+{
+    "content" : "test vs code 4 b22" ,
+    "important" : false
+}
+
+####
+
 get http://localhost:3001/api/notes
+
+####
+
+get http://localhost:3001/api/notes/64664242c1e3172c198b3c6c
+
+
+####
+
+delete http://localhost:3001/api/notes/646693e79eb6dc0bdee19ed5

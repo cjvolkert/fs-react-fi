@@ -3,7 +3,11 @@ get http://localhost:3001/api/persons
 
 ###
 
-delete http://localhost:3001/api/persons/1
+get http://localhost:3001/api/persons/646738ba624ced85f92b6480
+
+#########
+
+delete http://localhost:3001/api/persons/64673dbaa1e3c49beda96167
 
 ###
 
@@ -11,7 +15,7 @@ post http://localhost:3001/api/persons/
 Content-Type: application/json
 
 {
-        "name": "me1",
-    "number": "123"
+    "name": "T1",
+    "number": "12234562100"
 }
 
