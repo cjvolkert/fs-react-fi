@@ -75,7 +75,7 @@ const App = () => {
     phoneservice
       .add({
         name: newName,
-        phone: phoneNumber,
+        number: phoneNumber,
       })
       .then((newPhoneNumber) => {
         setPersons([newPhoneNumber].concat(persons));
@@ -88,7 +88,7 @@ const App = () => {
         }, 5000);
       })
       .catch((error) => {
-        setMessage(`Note ${error}`);
+        setMessage(`Error ${error.response.data.error}`);
         setTimeout(() => {
           setMessage(null);
         }, 5000);

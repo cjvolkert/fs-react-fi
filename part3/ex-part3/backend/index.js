@@ -19,7 +19,6 @@ app.get("/api/notes", (req, response) => {
 
 app.get("/api/notes/:id", (req, response, next) => {
   console.log(req.params.id);
-  const id = Number(req.params.id);
   let id2 = new mongoose.Types.ObjectId(req.params.id);
   console.log(id2);
 
@@ -37,7 +36,10 @@ app.get("/api/notes/:id", (req, response, next) => {
 app.delete("/api/notes/:id", (req, res, next) => {
   let id2 = new mongoose.Types.ObjectId(req.params.id);
   Note.findByIdAndDelete(id2)
-    .then((e) => res.status(204).end())
+    .then((e) => {
+      console.log(`deleted ${e}`);
+      res.status(204).end();
+    })
     .catch((err) => next(err));
 });
 
@@ -78,10 +80,12 @@ app.put("/api/notes/:id", (request, response, next) => {
     id,
     { content, important },
     { new: true, runValidators: true, context: "query" }
-  ).then((savedNote) => {
-    console.log("saved!");
-    response.json(savedNote);
-  });
+  )
+    .then((savedNote) => {
+      console.log("saved!");
+      response.json(savedNote);
+    })
+    .catch((err) => next(err));
 });
 
 const unknownEndpoint = (request, response) => {
@@ -94,14 +98,15 @@ app.use(unknownEndpoint);
 const errorHandler = (error, req, res, next) => {
   console.error(error);
   if (error.name === "CastError") {
-    return response.status(400).send({ error: "malformatted" });
+    return res.status(400).send({ error: "malformatted" });
   } else if (error.name === "ValidationError") {
-    return response.status(400).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
   next(error);
 };
 app.use(errorHandler);
 
+// eslint-disable-next-line no-undef
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
