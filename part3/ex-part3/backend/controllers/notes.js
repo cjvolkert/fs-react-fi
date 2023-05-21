@@ -2,11 +2,11 @@ const notesRouter = require("express").Router();
 const mongoose = require("mongoose");
 const Note = require("../models/note");
 
-notesRouter.get("/", (req, response) => {
-  response.end("<h1>hello </h1>");
-});
+// notesRouter.get("/", (req, response) => {
+//   response.end("<h1>hello </h1>");
+// });
 
-notesRouter.get("", (req, response) => {
+notesRouter.get("/", (req, response) => {
   Note.find({}).then((notes) => response.json(notes));
 });
 

@@ -20,7 +20,7 @@ app.use(express.static("build"));
 app.use(express.json());
 app.use(middleware.requestLogger);
 
-const notesRouter = require("/controllers/notes");
+const notesRouter = require("./controllers/notes");
 app.use("/api/notes", notesRouter);
 
 // handler of requests with unknown endpoint
@@ -28,4 +28,4 @@ app.use(middleware.unknownEndpoint);
 
 app.use(middleware.errorHandler);
 
-module.export = app;
+module.exports = app;
