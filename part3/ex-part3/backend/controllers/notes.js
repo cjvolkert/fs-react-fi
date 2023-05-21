@@ -6,37 +6,32 @@ const Note = require("../models/note");
 //   response.end("<h1>hello </h1>");
 // });
 
-notesRouter.get("/", (req, response) => {
-  Note.find({}).then((notes) => response.json(notes));
+notesRouter.get("/", async (req, response) => {
+  const notes = await Note.find({});
+  response.json(notes);
 });
 
-notesRouter.get("/:id", (req, response, next) => {
+notesRouter.get("/:id", async (req, response) => {
   console.log(req.params.id);
   let id2 = new mongoose.Types.ObjectId(req.params.id);
   console.log(id2);
 
-  Note.findById(id2)
-    .then((notes) => {
-      if (notes) {
-        return response.json(notes);
-      } else {
-        return response.status(404).end();
-      }
-    })
-    .catch((error) => next(error));
+  const note = await Note.findById(id2);
+  if (note) {
+    return response.json(note);
+  } else {
+    return response.status(404).end();
+  }
 });
 
-notesRouter.delete("/:id", (req, res, next) => {
+notesRouter.delete("/:id", async (req, res) => {
   let id2 = new mongoose.Types.ObjectId(req.params.id);
-  Note.findByIdAndDelete(id2)
-    .then((e) => {
-      console.log(`deleted ${e}`);
-      res.status(204).end();
-    })
-    .catch((err) => next(err));
+  const note = await Note.findByIdAndDelete(id2);
+  console.log(`deleted ${note}`);
+  res.status(204).end();
 });
 
-notesRouter.post("/", (request, response, next) => {
+notesRouter.post("/", async (request, response) => {
   const body = request.body;
 
   if (!body.content) {
@@ -49,16 +44,12 @@ notesRouter.post("/", (request, response, next) => {
     important: body.important || false,
   });
 
-  note
-    .save()
-    .then((savedNote) => {
-      console.log("saved!");
-      response.json(savedNote);
-    })
-    .catch((err) => next(err));
+  const savedNote = await note.save();
+  console.log("saved!");
+  response.json(savedNote);
 });
 
-notesRouter.put("/:id", (request, response, next) => {
+notesRouter.put("/:id", async (request, response) => {
   const { content, important } = request.body;
 
   let id = new mongoose.Types.ObjectId(request.params.id);
@@ -69,16 +60,13 @@ notesRouter.put("/:id", (request, response, next) => {
     });
   }
 
-  Note.findByIdAndUpdate(
+  const savedNote = await Note.findByIdAndUpdate(
     id,
     { content, important },
     { new: true, runValidators: true, context: "query" }
-  )
-    .then((savedNote) => {
-      console.log("saved!");
-      response.json(savedNote);
-    })
-    .catch((err) => next(err));
+  );
+  console.log("saved!");
+  response.json(savedNote);
 });
 
 module.exports = notesRouter;
