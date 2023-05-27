@@ -23,6 +23,12 @@ app.use(middleware.requestLogger);
 const blogsRouter = require("./controller/blogs");
 app.use("/api", blogsRouter);
 
+const userRouter = require("./controller/users");
+app.use("/api/user", userRouter);
+
+const loginRouter = require("./controller/login");
+app.use("/api/login", loginRouter);
+
 // handler of requests with unknown endpoint
 app.use(middleware.unknownEndpoint);
 
