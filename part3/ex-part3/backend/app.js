@@ -27,6 +27,9 @@ app.use("/api/notes", notesRouter);
 const userRouter = require("./controllers/users");
 app.use("/api/users", userRouter);
 
+const loginRouter = require("./controllers/login");
+app.use("/login", loginRouter);
+
 // handler of requests with unknown endpoint
 app.use(middleware.unknownEndpoint);
 
